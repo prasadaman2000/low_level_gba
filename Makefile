@@ -4,10 +4,13 @@
 # 	# ./gbafix kernel.gba
 
 PROJ    := main
-TARGET  := $(PROJ)
 
 OBJS    := $(PROJ).o graphics.o mem.o
-# HEADS	:= strucures.h
+SRCFOLDER := ./src/
+BUILDFOLDER := ./build/
+
+TARGET  := $(BUILLDFOLDER)$(PROJ)
+
 
 # --- Build defines ---------------------------------------------------
 
@@ -31,16 +34,16 @@ build: $(TARGET).gba
 
 # Strip and fix header (step 3,4)
 $(TARGET).gba : $(TARGET).elf
-	$(OBJCOPY) -v -O binary $< $@
-	-@./gbafix $@
+	$(OBJCOPY) -v -O binary $< $(BUILLDFOLDER)$@
+	-@./gbafix $(BUILLDFOLDER)$@
 
 # Link (step 2)
-$(TARGET).elf : $(OBJS)
-	$(LD) $^ $(LDFLAGS) -o $@
+$(BUILLDFOLDER)$(TARGET).elf : $(BUILLDFOLDER)$(OBJS)
+	$(LD) $^ $(LDFLAGS) -o $(BUILLDFOLDER)$@
 
 # Compile (step 1)
-$(OBJS) : %.o : %.c
-	$(CC) -c $< $(CFLAGS) -o $@
+$(OBJS) : $(BUILLDFOLDER)%.o : $(SRCFOLDER)%.c
+	$(CC) -c $< $(CFLAGS) -o $(BUILLDFOLDER)$@
 	$(CC) -S $< $(CFLAGS)
 		
 # --- Clean -----------------------------------------------------------
@@ -49,3 +52,5 @@ clean :
 	@rm -fv *.gba
 	@rm -fv *.elf
 	@rm -fv *.o
+	@rm -fv *.sav
+	@rm -fv *.s
