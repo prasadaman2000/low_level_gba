@@ -64,9 +64,6 @@ void * malloc(uint32 size_to_alloc){
     uint32 size = size_to_alloc + sizeof(uint32);
 
     for(int i = 0; i < MAX_NUM_BLOCKS; i++){
-        // draw a pixel every time a new block is explored
-        draw_pixel(i % SCREEN_H, 2 * i / SCREEN_H, 0xFFFF);
-
         // get address of i-th block
         curr = &(block_arr -> block_arr[i]);
 
@@ -106,8 +103,8 @@ void * malloc(uint32 size_to_alloc){
             return (char *)allocated_addr + sizeof(uint32);
         }
     }
-    return NULL;
-    // return (void *)1;
+    // return NULL;
+    return (void *)0;
 }
 
 /*

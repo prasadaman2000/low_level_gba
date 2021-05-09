@@ -1,6 +1,7 @@
 #include "../include/graphics.h"
 #include "../include/core.h"
 #include "../include/mem.h"
+#include "../include/timint.h"
 
 int main(){
     graphics_init();
@@ -8,8 +9,6 @@ int main(){
     // draw_pixel(0,0,0x0FF0);
     char * ptr = (char *)(malloc(0x3f000 - 4));
     *ptr = 'A';
-
-
 
     // char * ptr2 = (char *)malloc(26);
     // char * x = "abcdefghijklmnopqrstuvwxyz";
@@ -26,10 +25,12 @@ int main(){
     char * ptr2 = malloc(1);
 
     if(ptr2 == NULL){
-        draw_pixel(100, 100, 0xFFFF);
+        fill_color(GREEN);
     } else {
-        draw_pixel(100, 100, 0x00FF);
+        fill_color(RED);
     }
-   
+    
+    fill_color(WHITE);
+
     while(1);
 }

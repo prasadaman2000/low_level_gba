@@ -5,7 +5,7 @@
 
 PROJ    := main
 
-OBJS    := $(PROJ).o graphics.o mem.o
+OBJS    := $(PROJ).o graphics.o mem.o timint.o
 SRCFOLDER := ./src/
 BUILDFOLDER := ./build/
 
