@@ -10,4 +10,6 @@ typedef int int32;
 #define VIDEOMODE_3         0x0003
 #define BGMODE_2            0x0400
 
+void _panic();
+
 #endif

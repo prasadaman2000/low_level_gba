@@ -9,19 +9,13 @@
 #define ALLOC_BASE (void *) 0x02000010
 #define ALLOC_BLOCK_TRACK (block *) 0x02030000
 #define FREE_BLOCK_TRACK (block *) 0x0203F000
+#define WRAM_CEIL (block *) 0x0203FFFF
 #define BLOCK_SIZE sizeof(block)
 
 typedef struct block_t {
     void* location;
     uint32 size;
 } block;
-
-void _panic() {
-    while (1) {
-        fill_color(GREEN);
-        fill_color(RED);
-    }
-}
 
 void _write_debug_value(uint32 val) {
     *DEBUG_LOCATION = val;
@@ -53,13 +47,23 @@ void _set_alloc_location(void* loc) {
 
 void _write_allocated_block(block alloced) {
     uint32 num_allocs = _get_num_allocs();
-    *((ALLOC_BLOCK_TRACK)+(num_allocs * BLOCK_SIZE)) = alloced;
+    block* new_addr = (ALLOC_BLOCK_TRACK)+(num_allocs * BLOCK_SIZE);
+    if (new_addr + sizeof(block) >= FREE_BLOCK_TRACK) {
+        _write_debug_value(0xDEAD);
+        _panic();
+    }
+    *new_addr = alloced;
     _set_num_allocs(num_allocs + 1);
 }
 
 void _write_free_block(block alloced) {
     uint32 num_free = _get_num_free();
-    *(FREE_BLOCK_TRACK + (num_free * BLOCK_SIZE)) = alloced;
+    block* new_addr = FREE_BLOCK_TRACK + (num_free * BLOCK_SIZE);
+    if (new_addr + sizeof(block) >= WRAM_CEIL) {
+        _write_debug_value(0xC0FF);
+        _panic();
+    }
+    *new_addr = alloced;
     _set_num_free(num_free + 1);
 }
 
@@ -89,6 +93,7 @@ void mem_init() {
 }
 
 void* malloc(uint32 size) {
+    size = size - (size & 0b11) + 0b100; // 4 byte align all allocs
     uint32 num_free = _get_num_free();
     void* addr = NULL;
     for (uint32 i = 0; i < num_free; ++i) {
