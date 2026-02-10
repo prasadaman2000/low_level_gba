@@ -2,11 +2,11 @@
 
 ## This repository contains implementations of low level algorithms on the Gameboy Advance
 
-All C code written by Aman Prasad.
 
 ### [GBA Hardware Specs](https://www.akkit.org/info/gbatek.htm)
 
-### Algorithms implemented
+### Things implemented
 
-* Dynamic memory allocation - mem.c
-  * Contains implementation of malloc and an incomplete implementation of free
+* Dynamic memory allocation - [substack](https://amanlyman.substack.com/p/hello-programming-like-its-2001?r=bfpjx)
+* An extremely basic interrupt routine
+* Some very rudimentary graphics routines
