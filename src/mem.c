@@ -21,6 +21,10 @@ void _write_debug_value(uint32 val) {
     *DEBUG_LOCATION = val;
 }
 
+uint32 _read_debug_value() {
+    return *DEBUG_LOCATION;
+}
+
 uint32 _get_num_allocs() {
     return *NUM_ALLOCS;
 }
@@ -47,8 +51,8 @@ void _set_alloc_location(void* loc) {
 
 void _write_allocated_block(block alloced) {
     uint32 num_allocs = _get_num_allocs();
-    block* new_addr = (ALLOC_BLOCK_TRACK)+(num_allocs * BLOCK_SIZE);
-    if (new_addr + sizeof(block) >= FREE_BLOCK_TRACK) {
+    block* new_addr = ALLOC_BLOCK_TRACK + num_allocs;
+    if (new_addr + 1 >= FREE_BLOCK_TRACK) {
         _write_debug_value(0xDEAD);
         _panic();
     }
@@ -58,8 +62,8 @@ void _write_allocated_block(block alloced) {
 
 void _write_free_block(block alloced) {
     uint32 num_free = _get_num_free();
-    block* new_addr = FREE_BLOCK_TRACK + (num_free * BLOCK_SIZE);
-    if (new_addr + sizeof(block) >= WRAM_CEIL) {
+    block* new_addr = FREE_BLOCK_TRACK + num_free;
+    if (new_addr + 1 >= WRAM_CEIL) {
         _write_debug_value(0xC0FF);
         _panic();
     }
@@ -69,8 +73,8 @@ void _write_free_block(block alloced) {
 
 void _remove_free_block(uint32 free_block_idx) {
     for (uint32 j = free_block_idx; j < (_get_num_free() - 1); ++j) {
-        block* free_block = FREE_BLOCK_TRACK + j * BLOCK_SIZE;
-        block* next_free_block = free_block + BLOCK_SIZE;
+        block* free_block = FREE_BLOCK_TRACK + j;
+        block* next_free_block = free_block + 1;
         *free_block = *next_free_block;
     }
     _set_num_free(_get_num_free() - 1);
@@ -78,14 +82,14 @@ void _remove_free_block(uint32 free_block_idx) {
 
 void _remove_alloced_block(uint32 alloc_block_idx) {
     for (uint32 j = alloc_block_idx; j < (_get_num_allocs() - 1); ++j) {
-        block* alloc_block = ALLOC_BLOCK_TRACK + j * BLOCK_SIZE;
-        block* next_alloc_block = alloc_block + BLOCK_SIZE;
+        block* alloc_block = ALLOC_BLOCK_TRACK + j;
+        block* next_alloc_block = alloc_block + 1;
         *alloc_block = *next_alloc_block;
     }
     _set_num_allocs(_get_num_allocs() - 1);
 }
 
-// must be called a single time at system startup
+// must be called once at startup
 void mem_init() {
     _set_alloc_location(ALLOC_BASE);
     _set_num_allocs(0);
@@ -93,15 +97,28 @@ void mem_init() {
 }
 
 void* malloc(uint32 size) {
-    size = size - (size & 0b11) + 0b100; // 4 byte align all allocs
+    if (size & 0b11) {
+        size = (size - (size & 0b11)) + 0b100;
+    }
+    _write_debug_value(size);
     uint32 num_free = _get_num_free();
     void* addr = NULL;
     for (uint32 i = 0; i < num_free; ++i) {
-        block* free_block = FREE_BLOCK_TRACK + i * BLOCK_SIZE;
+        block* free_block = FREE_BLOCK_TRACK + i;
         if (free_block->size == size) {
             addr = free_block->location;
             _write_allocated_block(*free_block);
             _remove_free_block(i);
+            return addr;
+        }
+        else if (free_block->size > size) {
+            addr = free_block->location;
+            block new_block;
+            new_block.location = addr;
+            new_block.size = size;
+            _write_allocated_block(new_block);
+            free_block->location = (char*)free_block->location + size;
+            free_block->size -= size;
             return addr;
         }
     }
@@ -120,7 +137,7 @@ void* malloc(uint32 size) {
 
 void free(void* ptr) {
     for (uint32 i = 0; i < _get_num_allocs(); ++i) {
-        block* alloced_block = ALLOC_BLOCK_TRACK + (i * BLOCK_SIZE);
+        block* alloced_block = ALLOC_BLOCK_TRACK + i;
         if (alloced_block->location == ptr) {
             _write_free_block(*alloced_block);
             _remove_alloced_block(i);

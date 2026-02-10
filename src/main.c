@@ -14,34 +14,54 @@ void _panic1() {
 int main() {
     graphics_init();
     mem_init();
+    // interrupt_init();
 
-    uint8 rows = 3;
-    uint8 cols = 3;
+    // uint8 rows = 2;
+    // uint8 cols = 2;
 
-    matrix* m1 = new_matrix(rows, cols);
-    for (uint8 r = 0; r < rows; ++r) {
-        for (uint8 c = 0; c < cols; ++c) {
-            matrix_write(m1, r, c, r);
-        }
-    }
+    // matrix* m1 = new_matrix(rows, cols);
+    // for (uint8 r = 0; r < rows; ++r) {
+    //     for (uint8 c = 0; c < cols; ++c) {
+    //         if (r == c) {
+    //             matrix_write(m1, r, c, 100);
+    //         }
+    //     }
+    // }
 
-    matrix* m2 = new_matrix(rows, cols);
-    for (uint8 r = 0; r < rows; ++r) {
-        for (uint8 c = 0; c < cols; ++c) {
-            matrix_write(m2, r, c, c);
-        }
-    }
+    // matrix* m4 = new_matrix(20, 30);
 
+    // matrix* m2 = new_matrix(rows, cols);
+    // for (uint8 r = 0; r < rows; ++r) {
+    //     for (uint8 c = 0; c < cols; ++c) {
+    //         if (r == c) {
+    //             matrix_write(m2, r, c, 100);
+    //         }
+    //         else {
+    //             matrix_write(m2, r, c, 0);
+    //         }
+    //     }
+    // }
 
-    for (int i = 0; i < 100000; ++i) {
-        matrix* m3 = matmul(m1, m2);
-        matrix_copy(m3, m2);
-        free_matrix(m3);
-    }
+    // free(m4);
+
+    // for (int i = 0; i < 10000; ++i) {
+    //     matrix* m3 = matmul(m1, m2);
+    //     free_matrix(m3);
+    // }
+
+    // free_matrix(m1);
+    // free_matrix(m2);
 
     // _write_debug_value((uint32)dd);
 
-    fill_color(WHITE);
+    // _write_debug_value(sizeof(struct block_t));
 
+    void* x = malloc(8); // 10
+    void* y = malloc(8); // 18
+    free(y); // 18
+    x = malloc(8); // 18
+    free(x); // 18
+
+    // malloc(8);
     while (1);
 }

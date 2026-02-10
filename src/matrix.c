@@ -45,7 +45,8 @@ matrix* matmul(matrix* m1, matrix* m2) {
     for (uint8 m1x = 0; m1x < m1->dim1; ++m1x) {
         for (uint8 m1y = 0; m1y < m1->dim2; ++m1y) {
             for (uint8 m2y = 0; m2y < m2->dim2; ++m2y) {
-                uint32 new_val = matrix_access(to_ret, m1x, m2y) + matrix_access(m1, m1x, m1y) * matrix_access(m2, m1y, m2y);
+                uint32 new_val = matrix_access(to_ret, m1x, m2y)
+                    + matrix_access(m1, m1x, m1y) * matrix_access(m2, m1y, m2y);
                 matrix_write(to_ret, m1x, m2y, new_val);
             }
         }

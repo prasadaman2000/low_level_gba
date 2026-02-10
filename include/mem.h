@@ -4,3 +4,4 @@ void mem_init();
 void* malloc(uint32 size);
 void free(void* ptr);
 void _write_debug_value(uint32 val);
+uint32 _read_debug_value();

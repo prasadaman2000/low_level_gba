@@ -5,9 +5,9 @@
 
 PROJ    := main
 
-OBJS    := $(PROJ).o graphics.o mem.o timint.o
+OBJS    := $(PROJ).o graphics.o mem.o timint.o matrix.o core.o
 SRCFOLDER := ./src/
-BUILDFOLDER := ./build/
+BUILLDFOLDER := ./
 
 TARGET  := $(BUILLDFOLDER)$(PROJ)
 
@@ -19,11 +19,10 @@ CC      := $(PREFIX)gcc
 LD      := $(PREFIX)gcc
 OBJCOPY := $(PREFIX)objcopy
 
-ARCH    := -mthumb-interwork -mthumb
 SPECS   := -specs=gba.specs
 
-CFLAGS  := $(ARCH) -Wall -fno-strict-aliasing -g
-LDFLAGS := $(ARCH) $(SPECS)
+CFLAGS  := -Wall -fno-strict-aliasing -O0
+LDFLAGS := $(SPECS)
 
 
 .PHONY : build clean
