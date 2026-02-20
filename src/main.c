@@ -56,14 +56,10 @@ int main() {
 
     // _write_debug_value(sizeof(struct block_t));
 
-    void* x = malloc(8); // 10
-    *(uint32*)x = 0xFF;
-    void* y = malloc(8); // 18
-    *(uint32*)y = 0xEE;
-    free(y); // 18
-    x = malloc(8); // 18
-    *(uint32*)y = 0xBB;
-    free(x); // 18
+    char* x = fast_malloc(10);
+    *x = 0xFF;
+    x = uncache(x);
+    *x = 0xEE;
 
     // malloc(8);
     while (1);
