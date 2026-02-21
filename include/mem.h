@@ -21,5 +21,8 @@ void* cache(void* ptr);
 // move a pointer from iwram to ewram
 void* uncache(void* ptr);
 
+// copy n WORDS from src to dst
+void memcpy(const void* src, void* dst, uint32 count);
+
 void _write_debug_value(uint32 val);
 uint32 _read_debug_value();

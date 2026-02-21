@@ -74,23 +74,17 @@ uint32 det(matrix* m) {
 }
 
 void matrix_copy(matrix* src, matrix* dst) {
-    if ((src->dim1 > dst->dim1) || (src->dim2 > dst->dim2)) {
+    if ((src->dim1 != dst->dim1) || (src->dim2 != dst->dim2)) {
         _write_debug_value(0xBEEF);
         _panic();
     }
-
-    for (uint8 srcX = 0; srcX < src->dim1; ++srcX) {
-        for (uint8 srcY = 0; srcY < src->dim2; ++srcY) {
-            matrix_write(dst, srcX, srcY, matrix_access(src, srcX, srcY));
-        }
-    }
+    memcpy(src->data, dst->data, (src->dim1 * src->dim2));
 }
 
+void matrix_cache(matrix* m) {
+    m->data = cache(m->data);
+}
 
-
-/*
-1 2    1 3 5      m1(0,0) * m2(0,0) + m1()
-3 4    2 4 6
-5 6
-
- */
+void matrix_uncache(matrix* m) {
+    m->data = uncache(m->data);
+}

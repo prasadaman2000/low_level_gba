@@ -2,18 +2,30 @@
 #include "../include/core.h"
 #include "../include/mem.h"
 
-#define WRAM_ALLOCATOR (wram_allocator *)0x02000000
-#define E_ALLOC_BASE (void *) 0x02000100
-#define E_ALLOC_BLOCK_TRACK (block *) 0x02030000
-#define E_FREE_BLOCK_TRACK (block *) 0x02037800
-#define I_ALLOC_BLOCK_TRACK (block *) 0x0203F000
-#define I_FREE_BLOCK_TRACK (block *) 0x0203F800
-#define E_WRAM_CEIL (block *) 0x0203FFFF
+#define WRAM_ALLOCATOR ((wram_allocator *)0x02000000)
+#define E_ALLOC_BASE ((void *) 0x02000100)
+#define E_ALLOC_BLOCK_TRACK ((block *) 0x02030000)
+#define E_FREE_BLOCK_TRACK ((block *) 0x02037800)
+#define I_ALLOC_BLOCK_TRACK ((block *) 0x0203F000)
+#define I_FREE_BLOCK_TRACK ((block *) 0x0203F800)
+#define E_WRAM_CEIL ((block *) 0x0203FFFF)
 #define BLOCK_SIZE sizeof(block)
 
-#define I_ALLOC_BASE (void *) 0x03000000
-#define I_ALLOC_CEIL 0x03007D00
+#define I_ALLOC_BASE ((void *) 0x03000000)
+#define I_ALLOC_CEIL ((void *)0x03007D00)
 
+#define REG_DMA ((dma_reg*)0x040000B0)
+#define DMA_ON (1 << 31)
+#define DMA_SRC_INC (0 << 23)
+#define DMA_DST_INC (0 << 21)
+#define DMA_32 (1 << 26)
+
+typedef struct dma_reg_t
+{
+    const void* src;
+    void* dst;
+    uint32 cnt;
+} dma_reg;
 
 typedef struct block_t {
     void* location;
@@ -49,7 +61,7 @@ void mem_init() {
     w_a->ewram_allocator.next_alloc_location = E_ALLOC_BASE;
     w_a->ewram_allocator.num_allocs = 0;
     w_a->ewram_allocator.num_free = 0;
-    w_a->ewram_allocator.free_ceiling = (block*)I_ALLOC_BLOCK_TRACK;
+    w_a->ewram_allocator.free_ceiling = I_ALLOC_BLOCK_TRACK;
     w_a->ewram_allocator.alloc_ceiling = (char*)E_ALLOC_BLOCK_TRACK;
 
     w_a->iwram_allocator.alloc_block_track = I_ALLOC_BLOCK_TRACK;
@@ -57,7 +69,7 @@ void mem_init() {
     w_a->iwram_allocator.next_alloc_location = I_ALLOC_BASE;
     w_a->iwram_allocator.num_allocs = 0;
     w_a->iwram_allocator.num_free = 0;
-    w_a->iwram_allocator.free_ceiling = (block*)E_WRAM_CEIL;
+    w_a->iwram_allocator.free_ceiling = E_WRAM_CEIL;
     w_a->iwram_allocator.alloc_ceiling = (char*)I_ALLOC_CEIL;
 }
 
@@ -207,13 +219,23 @@ void fast_free(void* ptr) {
     _free(&wram_allocator_ptr()->iwram_allocator, ptr);
 }
 
+static inline void _dma_cpy(const void* src, void* dst, uint32 count) {
+    REG_DMA[3].cnt = 0;
+    REG_DMA[3].src = src;
+    REG_DMA[3].dst = dst;
+    REG_DMA[3].cnt = count | DMA_DST_INC | DMA_SRC_INC | DMA_ON | DMA_32;
+}
+
+void memcpy(const void* src, void* dst, uint32 count) {
+    _dma_cpy(src, dst, count);
+}
+
+
 void* cache(void* ptr) {
     uint32 ptr_size = _free(&wram_allocator_ptr()->ewram_allocator, ptr);
     char* fast_ptr = _malloc(&wram_allocator_ptr()->iwram_allocator, ptr_size);
 
-    for (uint32 i = 0; i < ptr_size; ++i) {
-        *(fast_ptr + i) = *((char*)ptr + i);
-    }
+    memcpy(ptr, fast_ptr, ptr_size / 4);
 
     return fast_ptr;
 }
@@ -222,9 +244,8 @@ void* uncache(void* ptr) {
     uint32 ptr_size = _free(&wram_allocator_ptr()->iwram_allocator, ptr);
     char* slow_ptr = _malloc(&wram_allocator_ptr()->ewram_allocator, ptr_size);
 
-    for (uint32 i = 0; i < ptr_size; ++i) {
-        *(slow_ptr + i) = *((char*)ptr + i);
-    }
+    memcpy(ptr, slow_ptr, ptr_size / 4);
 
     return slow_ptr;
 }
+

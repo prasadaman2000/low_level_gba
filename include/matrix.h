@@ -11,5 +11,7 @@ uint32 det(matrix* m);
 uint32 matrix_access(matrix* m, uint8 x, uint8 y);
 void free_matrix(matrix* m);
 void matrix_copy(matrix* src, matrix* dst);
+void matrix_cache(matrix* m);
+void matrix_uncache(matrix* m);
 
 #endif

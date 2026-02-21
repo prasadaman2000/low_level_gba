@@ -16,17 +16,20 @@ int main() {
     mem_init();
     // interrupt_init();
 
-    // uint8 rows = 2;
-    // uint8 cols = 2;
+    uint8 rows = 10;
+    uint8 cols = 10;
 
-    // matrix* m1 = new_matrix(rows, cols);
-    // for (uint8 r = 0; r < rows; ++r) {
-    //     for (uint8 c = 0; c < cols; ++c) {
-    //         if (r == c) {
-    //             matrix_write(m1, r, c, 100);
-    //         }
-    //     }
-    // }
+    matrix* m1 = new_matrix(rows, cols);
+    for (uint8 r = 0; r < rows; ++r) {
+        for (uint8 c = 0; c < cols; ++c) {
+            matrix_write(m1, r, c, 100);
+        }
+    }
+
+    matrix* m2 = new_matrix(rows, cols);
+    matrix_cache(m2);
+    matrix_copy(m1, m2);
+    matrix_uncache(m2);
 
     // matrix* m4 = new_matrix(20, 30);
 
@@ -56,10 +59,8 @@ int main() {
 
     // _write_debug_value(sizeof(struct block_t));
 
-    char* x = fast_malloc(10);
-    *x = 0xFF;
-    x = uncache(x);
-    *x = 0xEE;
+    // char* x = malloc(3);
+    // x = cache(x);
 
     // malloc(8);
     while (1);
